@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "291948425503",
+    "project_id": "ludix-56c7f",
+    "storage_bucket": "ludix-56c7f.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:291948425503:android:5e0786bba90b6cba97802a",
+        "android_client_info": {
+          "package_name": "Ludix.Proyecto"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "291948425503-4t16i8aq8kl0tqv0ss9q7teeeti3n2ju.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCe3kzXMRu8X1WzGceUYrrED0xDqEDrMEI"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "291948425503-4t16i8aq8kl0tqv0ss9q7teeeti3n2ju.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
