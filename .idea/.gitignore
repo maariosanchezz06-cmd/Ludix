@@ -1,3 +1,17 @@
-# Default ignored files
-/shelf/
-/workspace.xml
+# Archivos específicos de Android/Gradle
+.gradle/
+build/
+captures/
+local.properties
+
+# Configuración de Android Studio
+.idea/workspace.xml
+.idea/libraries/
+.idea/shelf/
+.idea/assetWizardSettings.xml
+.idea/modules.xml
+.idea/navEditor.xml
+*.iml
+
+# Archivos de log
+*.log
