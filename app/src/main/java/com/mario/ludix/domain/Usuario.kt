@@ -9,5 +9,6 @@ data class Usuario(
     val nombre_usuario: String = "",   // El "nick" del jugador
     val email: String = "",            // Correo de registro
     val imagen_perfil: String = "",    // URL de la foto en Firebase Storage
-    val fecha_registro: Long = System.currentTimeMillis() // Fecha automática
+    val fecha_registro: Long = System.currentTimeMillis(), // Fecha automática
+    val estado: String = "ACTIVO"      // Objetivo 5.5: Control de cuenta (ACTIVO/INACTIVO)
 )
