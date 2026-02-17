@@ -26,6 +26,7 @@ class VideoAdapter(
         val ivLike: ImageView = view.findViewById(R.id.ivLike)
         val ivShare: ImageView = view.findViewById(R.id.ivShare)
         val ivComments: ImageView = view.findViewById(R.id.ivComments)
+        val ivPerfil: ImageView = view.findViewById(R.id.ivPerfilMini) // Lo añadimos por si quieres cambiar la foto luego
         var player: ExoPlayer? = null
 
         // Estado local para el like
@@ -41,14 +42,14 @@ class VideoAdapter(
     override fun onBindViewHolder(holder: VideoViewHolder, position: Int) {
         val clip = listaVideos[position]
 
-        // 1. Configurar Reproductor
+        // 1. Configurar Reproductor (Uno nuevo para cada vídeo)
         val player = ExoPlayer.Builder(context).build()
         holder.playerView.player = player
         holder.player = player
 
         player.addListener(object : Player.Listener {
             override fun onPlayerError(error: PlaybackException) {
-                Log.e("VideoError", "Error: ${error.message}")
+                Log.e("VideoError", "Error en el vídeo de ${clip.autor}: ${error.message}")
             }
         })
 
@@ -61,36 +62,44 @@ class VideoAdapter(
                 player.repeatMode = Player.REPEAT_MODE_ONE
             }
         } catch (e: Exception) {
-            Log.e("VideoAdapter", "Error URL: ${e.message}")
+            Log.e("VideoAdapter", "Error cargando URL: ${e.message}")
         }
 
-        // --- 2. LÓGICA DEL BOTÓN LIKE (ME GUSTA) ---
+        // --- 2. LÓGICA DEL BOTÓN LIKE ---
+        // Reseteamos el estado visual por si el ViewHolder se recicla
+        holder.isLiked = false
+        holder.ivLike.setImageResource(R.drawable.ic_heart_outline)
+        holder.ivLike.setColorFilter(android.graphics.Color.WHITE)
+
         holder.ivLike.setOnClickListener {
             if (!holder.isLiked) {
-                // Si NO tiene like -> Poner relleno rojo
+                // ACTIVAR LIKE: Corazón relleno y rojo
                 holder.ivLike.setImageResource(R.drawable.ic_heart_filled)
-                holder.ivLike.setColorFilter(null) // Quitamos cualquier tinte para que se vea el rojo del XML
+                holder.ivLike.setColorFilter(android.graphics.Color.RED)
                 holder.isLiked = true
-                // Opcional: Toast.makeText(context, "¡Te gusta!", Toast.LENGTH_SHORT).show()
             } else {
-                // Si YA tiene like -> Volver al borde blanco
+                // QUITAR LIKE: Corazón borde y blanco
                 holder.ivLike.setImageResource(R.drawable.ic_heart_outline)
-                // Forzamos el color blanco por si acaso
                 holder.ivLike.setColorFilter(android.graphics.Color.WHITE)
                 holder.isLiked = false
             }
         }
 
-        // 3. Otros botones (Solo para avisar que funcionan)
+        // 3. Otros botones
         holder.ivShare.setOnClickListener {
-            Toast.makeText(context, "Compartiendo vídeo...", Toast.LENGTH_SHORT).show()
+            Toast.makeText(context, "Compartiendo el vídeo de ${clip.autor}", Toast.LENGTH_SHORT).show()
         }
 
         holder.ivComments.setOnClickListener {
-            Toast.makeText(context, "Abriendo comentarios...", Toast.LENGTH_SHORT).show()
+            Toast.makeText(context, "Cargando comentarios...", Toast.LENGTH_SHORT).show()
+        }
+
+        holder.ivPerfil.setOnClickListener {
+            Toast.makeText(context, "Perfil de ${clip.autor}", Toast.LENGTH_SHORT).show()
         }
     }
 
+    // Limpieza de memoria fundamental para que no se pete la app
     override fun onViewRecycled(holder: VideoViewHolder) {
         super.onViewRecycled(holder)
         holder.player?.release()
