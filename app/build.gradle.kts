@@ -62,4 +62,9 @@ dependencies {
     // Añade estas dos líneas para que funcione el ViewModel y el viewModelScope
     implementation("androidx.lifecycle:lifecycle-viewmodel-ktx:2.6.2")
     implementation("androidx.lifecycle:lifecycle-livedata-ktx:2.6.2")
+    // VIDEO PLAYER (Media3 - ExoPlayer)
+    implementation("androidx.media3:media3-exoplayer:1.2.0")
+    implementation("androidx.media3:media3-ui:1.2.0")
+    implementation("androidx.media3:media3-common:1.2.0")
+    implementation("com.github.bumptech.glide:glide:4.16.0")
 }
