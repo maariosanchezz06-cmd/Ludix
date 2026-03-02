@@ -6,6 +6,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageView
+import android.widget.TextView
 import android.widget.Toast
 import androidx.media3.common.MediaItem
 import androidx.media3.common.PlaybackException
@@ -22,14 +23,15 @@ class VideoAdapter(
 ) : RecyclerView.Adapter<VideoAdapter.VideoViewHolder>() {
 
     class VideoViewHolder(view: View) : RecyclerView.ViewHolder(view) {
-        val playerView: PlayerView = view.findViewById(R.id.playerView)
-        val ivLike: ImageView = view.findViewById(R.id.ivLike)
-        val ivShare: ImageView = view.findViewById(R.id.ivShare)
-        val ivComments: ImageView = view.findViewById(R.id.ivComments)
-        val ivPerfil: ImageView = view.findViewById(R.id.ivPerfilMini) // Lo añadimos por si quieres cambiar la foto luego
-        var player: ExoPlayer? = null
+        // Usamos try-catch o verificamos nulos para evitar el cierre
+        val playerView: PlayerView? = view.findViewById(R.id.playerView)
+        val ivLike: ImageView? = view.findViewById(R.id.ivLike)
+        val ivShare: ImageView? = view.findViewById(R.id.ivShare)
+        val ivComments: ImageView? = view.findViewById(R.id.ivComments)
+        val tvAutor: TextView? = view.findViewById(R.id.tvAutor)
+        val tvTitulo: TextView? = view.findViewById(R.id.tvTitulo)
 
-        // Estado local para el like
+        var player: ExoPlayer? = null
         var isLiked: Boolean = false
     }
 
@@ -42,14 +44,18 @@ class VideoAdapter(
     override fun onBindViewHolder(holder: VideoViewHolder, position: Int) {
         val clip = listaVideos[position]
 
-        // 1. Configurar Reproductor (Uno nuevo para cada vídeo)
+        // --- 1. SETEAR TEXTOS CON PROTECCIÓN ---
+        holder.tvAutor?.text = clip.autor ?: "@usuario"
+        holder.tvTitulo?.text = clip.titulo ?: "Sin descripción"
+
+        // --- 2. CONFIGURAR REPRODUCTOR ---
         val player = ExoPlayer.Builder(context).build()
-        holder.playerView.player = player
+        holder.playerView?.player = player
         holder.player = player
 
         player.addListener(object : Player.Listener {
             override fun onPlayerError(error: PlaybackException) {
-                Log.e("VideoError", "Error en el vídeo de ${clip.autor}: ${error.message}")
+                Log.e("VideoError", "Error en el vídeo: ${error.message}")
             }
         })
 
@@ -65,41 +71,20 @@ class VideoAdapter(
             Log.e("VideoAdapter", "Error cargando URL: ${e.message}")
         }
 
-        // --- 2. LÓGICA DEL BOTÓN LIKE ---
-        // Reseteamos el estado visual por si el ViewHolder se recicla
-        holder.isLiked = false
-        holder.ivLike.setImageResource(R.drawable.ic_heart_outline)
-        holder.ivLike.setColorFilter(android.graphics.Color.WHITE)
-
-        holder.ivLike.setOnClickListener {
+        // --- 3. LÓGICA DEL BOTÓN LIKE ---
+        holder.ivLike?.setOnClickListener {
             if (!holder.isLiked) {
-                // ACTIVAR LIKE: Corazón relleno y rojo
                 holder.ivLike.setImageResource(R.drawable.ic_heart_filled)
                 holder.ivLike.setColorFilter(android.graphics.Color.RED)
                 holder.isLiked = true
             } else {
-                // QUITAR LIKE: Corazón borde y blanco
                 holder.ivLike.setImageResource(R.drawable.ic_heart_outline)
                 holder.ivLike.setColorFilter(android.graphics.Color.WHITE)
                 holder.isLiked = false
             }
         }
-
-        // 3. Otros botones
-        holder.ivShare.setOnClickListener {
-            Toast.makeText(context, "Compartiendo el vídeo de ${clip.autor}", Toast.LENGTH_SHORT).show()
-        }
-
-        holder.ivComments.setOnClickListener {
-            Toast.makeText(context, "Cargando comentarios...", Toast.LENGTH_SHORT).show()
-        }
-
-        holder.ivPerfil.setOnClickListener {
-            Toast.makeText(context, "Perfil de ${clip.autor}", Toast.LENGTH_SHORT).show()
-        }
     }
 
-    // Limpieza de memoria fundamental para que no se pete la app
     override fun onViewRecycled(holder: VideoViewHolder) {
         super.onViewRecycled(holder)
         holder.player?.release()
