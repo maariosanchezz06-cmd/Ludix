@@ -11,6 +11,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.navigation.findNavController
 import androidx.navigation.ui.setupWithNavController
 import com.google.android.material.bottomnavigation.BottomNavigationView
+import com.google.android.material.snackbar.Snackbar
 import com.google.firebase.auth.ktx.auth
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
@@ -25,7 +26,7 @@ class MainActivity : AppCompatActivity() {
         if (uri != null) {
             mostrarDialogoTitulo(uri)
         } else {
-            Toast.makeText(this, "No seleccionaste ningún vídeo", Toast.LENGTH_SHORT).show()
+            Snackbar.make(binding.root, "No seleccionaste ningún vídeo", Snackbar.LENGTH_SHORT).show()
         }
     }
 
@@ -40,7 +41,7 @@ class MainActivity : AppCompatActivity() {
 
         val currentUser = Firebase.auth.currentUser
         if (currentUser == null) {
-            Toast.makeText(this, "Atención: No has iniciado sesión", Toast.LENGTH_LONG).show()
+            Snackbar.make(binding.root, "Atención: No has iniciado sesión", Snackbar.LENGTH_LONG).show()
             binding.root.post {
                 try { navController.navigate(R.id.loginFragment) } 
                 catch (e: Exception) {
@@ -57,7 +58,10 @@ class MainActivity : AppCompatActivity() {
                     false 
                 }
                 R.id.navigation_home -> { navController.navigate(R.id.navigation_home); true }
-                R.id.navigation_search -> { true }
+                R.id.navigation_search -> { 
+                    navController.navigate(R.id.navigation_search)
+                    true 
+                }
                 R.id.navigation_profile -> { navController.navigate(R.id.navigation_profile); true }
                 else -> false
             }
@@ -65,27 +69,40 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun mostrarDialogoTitulo(videoUri: Uri) {
-        val builder = AlertDialog.Builder(this)
-        builder.setTitle("Nuevo Clip")
-        builder.setMessage("Escribe un título o descripción para tu vídeo:")
-        val input = EditText(this)
-        builder.setView(input)
+        val dialogView = layoutInflater.inflate(R.layout.dialog_upload_video, null)
+        
+        val dialog = androidx.appcompat.app.AlertDialog.Builder(this)
+            .setView(dialogView)
+            .create()
 
-        builder.setPositiveButton("Subir") { dialog, _ ->
-            val titulo = input.text.toString().trim()
+        dialog.window?.setBackgroundDrawable(android.graphics.drawable.ColorDrawable(android.graphics.Color.TRANSPARENT))
+
+        val etInput = dialogView.findViewById<android.widget.EditText>(R.id.etDialogInput)
+        val btnSubmit = dialogView.findViewById<android.widget.Button>(R.id.btnDialogSubmit)
+
+        btnSubmit.setOnClickListener {
+            val titulo = etInput.text.toString().trim()
             if (titulo.isNotEmpty()) {
                 subirVideoAFirebase(videoUri, titulo)
+                dialog.dismiss()
             } else {
-                Toast.makeText(this, "El título no puede estar vacío", Toast.LENGTH_SHORT).show()
+                Snackbar.make(
+                    binding.root, 
+                    "El título no puede estar vacío", 
+                    Snackbar.LENGTH_SHORT
+                ).show()
             }
-            dialog.dismiss()
         }
-        builder.setNegativeButton("Cancelar") { dialog, _ -> dialog.cancel() }
-        builder.show()
+        dialog.show()
     }
 
     private fun subirVideoAFirebase(videoUri: Uri, tituloVideo: String) {
-        Toast.makeText(this, "Iniciando subida... ten paciencia 🚀", Toast.LENGTH_SHORT).show()
+        // MENSAJE LIMPIO: Fondo oscuro, letras blancas
+        val snackbar = Snackbar.make(binding.root, "Iniciando subida... 🚀", Snackbar.LENGTH_LONG)
+        snackbar.view.background = androidx.core.content.ContextCompat.getDrawable(this, R.drawable.bg_bottom_nav)
+        snackbar.setTextColor(android.graphics.Color.WHITE) // Letras blancas
+        snackbar.show()
+
         val storageRef = Firebase.storage.getReferenceFromUrl("gs://ludix-56c7f.firebasestorage.app")
         val nombreArchivo = "videos/clip_${System.currentTimeMillis()}.mp4"
         val videoRef = storageRef.child(nombreArchivo)
@@ -96,22 +113,21 @@ class MainActivity : AppCompatActivity() {
                     guardarEnFirestore(downloadUri.toString(), tituloVideo)
                 }
             }
-            .addOnFailureListener { e -> Toast.makeText(this, "Error: ${e.message}", Toast.LENGTH_LONG).show() }
+            .addOnFailureListener { e -> 
+                Toast.makeText(this, "Error: ${e.message}", Toast.LENGTH_LONG).show() 
+            }
     }
 
-    // LÓGICA NUEVA: Buscar el nombre real antes de guardar
     private fun guardarEnFirestore(urlVideo: String, tituloVideo: String) {
         val db = Firebase.firestore
         val uidAutor = Firebase.auth.currentUser?.uid ?: "sin_id"
 
-        // Buscamos el nombre del usuario en la base de datos
         db.collection("usuarios").document(uidAutor).get()
             .addOnSuccessListener { document ->
-                // Si lo encuentra, usa ese nombre; si no, pone "Gamer"
                 val nombreReal = document.getString("nombre_usuario") ?: "Gamer"
 
                 val nuevoVideo = hashMapOf(
-                    "autor" to "@$nombreReal", // Usamos el nombre real arreglado
+                    "autor" to "@$nombreReal",
                     "autorId" to uidAutor,
                     "url" to urlVideo,
                     "titulo" to tituloVideo,
@@ -121,7 +137,11 @@ class MainActivity : AppCompatActivity() {
 
                 db.collection("clips").add(nuevoVideo)
                     .addOnSuccessListener {
-                        Toast.makeText(this, "¡Vídeo publicado por $nombreReal! 🎉", Toast.LENGTH_LONG).show()
+                        // NUEVO MENSAJE LIMPIO DE VÍDEO PUBLICADO
+                        val snackbar = Snackbar.make(binding.root, "¡Vídeo publicado por $nombreReal! 🎉", Snackbar.LENGTH_LONG)
+                        snackbar.view.background = androidx.core.content.ContextCompat.getDrawable(this, R.drawable.bg_bottom_nav)
+                        snackbar.setTextColor(android.graphics.Color.WHITE)
+                        snackbar.show()
                     }
             }
     }

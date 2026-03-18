@@ -67,7 +67,7 @@
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="1.2k"
+            android:text="0"
             android:textColor="@color/white"
             android:textSize="12sp"
             android:layout_marginBottom="25dp"

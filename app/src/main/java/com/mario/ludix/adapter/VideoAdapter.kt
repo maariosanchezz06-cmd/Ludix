@@ -13,7 +13,11 @@ import androidx.media3.common.PlaybackException
 import androidx.media3.common.Player
 import androidx.media3.exoplayer.ExoPlayer
 import androidx.media3.ui.PlayerView
+import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.google.android.material.bottomsheet.BottomSheetDialog
+import com.google.android.material.snackbar.Snackbar
+import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FieldValue
 import com.google.firebase.firestore.FirebaseFirestore
 import com.mario.ludix.R
@@ -31,6 +35,7 @@ class VideoAdapter(
         val ivLike: ImageView? = view.findViewById(R.id.ivLike)
         val tvLikesCount: TextView? = view.findViewById(R.id.tvLikesCount)
         val ivShare: ImageView? = view.findViewById(R.id.ivShare) // Botón compartir
+        val ivComments: ImageView? = view.findViewById(R.id.ivComments) // Botón comentarios
         val tvAutor: TextView? = view.findViewById(R.id.tvAutor)
         val tvTitulo: TextView? = view.findViewById(R.id.tvTitulo)
 
@@ -68,7 +73,7 @@ class VideoAdapter(
             Log.e("VideoAdapter", "Error cargando URL: ${e.message}")
         }
 
-        // --- LÓGICA DE COMPARTIR (NUEVO) ---
+        // --- LÓGICA DE COMPARTIR ---
         holder.ivShare?.setOnClickListener {
             val shareIntent = Intent().apply {
                 action = Intent.ACTION_SEND
@@ -97,6 +102,59 @@ class VideoAdapter(
                 holder.tvLikesCount?.text = clip.likes.toString()
                 clipRef.update("likes", FieldValue.increment(-1))
             }
+        }
+
+        // --- LÓGICA DE COMENTARIOS (CON LECTURA EN TIEMPO REAL) ---
+        holder.ivComments?.setOnClickListener {
+            val bottomSheetDialog = BottomSheetDialog(context)
+            val sheetView = LayoutInflater.from(context).inflate(R.layout.bottom_sheet_comments, null)
+            bottomSheetDialog.setContentView(sheetView)
+
+            bottomSheetDialog.setOnShowListener { dialog ->
+                val d = dialog as BottomSheetDialog
+                val bottomSheetInternal = d.findViewById<View>(com.google.android.material.R.id.design_bottom_sheet)
+                bottomSheetInternal?.setBackgroundColor(android.graphics.Color.TRANSPARENT)
+            }
+
+            val etComentario = sheetView.findViewById<android.widget.EditText>(R.id.etComentario)
+            val btnEnviar = sheetView.findViewById<ImageView>(R.id.btnEnviarComentario)
+            val rvComentarios = sheetView.findViewById<RecyclerView>(R.id.rvListaComentarios)
+            
+            rvComentarios.layoutManager = LinearLayoutManager(context)
+
+            // 1. ESCUCHAR LOS COMENTARIOS EN TIEMPO REAL DESDE FIREBASE
+            db.collection("clips").document(clip.id).collection("comentarios")
+                .orderBy("timestamp")
+                .addSnapshotListener { snapshots, e ->
+                    if (e != null || snapshots == null) return@addSnapshotListener
+                    
+                    val listaComentarios = snapshots.map { doc -> doc.toObject(Comentario::class.java) }
+                    rvComentarios.adapter = ComentarioAdapter(listaComentarios)
+                    
+                    // Hacer scroll automático al último mensaje
+                    if (listaComentarios.isNotEmpty()) {
+                        rvComentarios.smoothScrollToPosition(listaComentarios.size - 1)
+                    }
+                }
+
+            // 2. ENVIAR NUEVO COMENTARIO
+            btnEnviar.setOnClickListener {
+                val textoComentario = etComentario.text.toString().trim()
+                if (textoComentario.isNotEmpty()) {
+                    val uidActual = FirebaseAuth.getInstance().currentUser?.uid ?: "anonimo"
+                    val comentarioData = hashMapOf(
+                        "texto" to textoComentario,
+                        "autorId" to uidActual,
+                        "timestamp" to System.currentTimeMillis()
+                    )
+
+                    db.collection("clips").document(clip.id).collection("comentarios").add(comentarioData)
+                        .addOnSuccessListener {
+                            etComentario.text.clear() // Vaciamos la barra tras enviar
+                        }
+                }
+            }
+            bottomSheetDialog.show()
         }
     }
 

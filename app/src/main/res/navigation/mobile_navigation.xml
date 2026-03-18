@@ -53,4 +53,10 @@
         android:label="@string/title_notifications"
         tools:layout="@layout/fragment_notifications" />
 
+    <fragment
+        android:id="@+id/navigation_search"
+        android:name="com.mario.ludix.ui.search.SearchFragment"
+        android:label="Buscador"
+        tools:layout="@layout/fragment_search" />
+
 </navigation>
