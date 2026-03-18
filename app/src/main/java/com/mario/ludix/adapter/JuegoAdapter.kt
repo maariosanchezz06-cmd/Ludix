@@ -8,14 +8,14 @@ import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
 import com.mario.ludix.R
-import com.mario.ludix.domain.Videojuego // ¡CORREGIDO! Apunta a tu carpeta real
+import com.mario.ludix.domain.Videojuego
 
-class JuegoAdapter(private val listaJuegos: List<Videojuego>) :
-    RecyclerView.Adapter<JuegoAdapter.JuegoViewHolder>() {
+class JuegoAdapter(
+    private val listaJuegos: List<Videojuego>,
+    private val onJuegoClick: (Videojuego) -> Unit // NUEVO: Permite hacer clic en el juego
+) : RecyclerView.Adapter<JuegoAdapter.JuegoViewHolder>() {
 
     class JuegoViewHolder(view: View) : RecyclerView.ViewHolder(view) {
-        // Asegúrate de que estos IDs existen en tu item_juego.xml
-        // Si usaste otros nombres, avísame.
         val titulo: TextView = view.findViewById(R.id.tvTituloJuego)
         val genero: TextView = view.findViewById(R.id.tvGenero)
         val puntuacion: TextView = view.findViewById(R.id.tvPuntuacion)
@@ -41,6 +41,11 @@ class JuegoAdapter(private val listaJuegos: List<Videojuego>) :
                 .centerCrop()
                 .placeholder(R.drawable.logo_ludix)
                 .into(holder.portada)
+        }
+
+        // NUEVO: Al tocar la tarjeta del juego, avisamos a la pantalla principal
+        holder.itemView.setOnClickListener {
+            onJuegoClick(juego)
         }
     }
 
