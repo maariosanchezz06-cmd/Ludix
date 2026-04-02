@@ -10,6 +10,8 @@ import androidx.navigation.fragment.findNavController
 import com.google.firebase.auth.FirebaseAuth
 import com.mario.ludix.R
 import com.mario.ludix.databinding.FragmentLoginBinding
+import com.google.firebase.firestore.ktx.firestore
+import com.google.firebase.ktx.Firebase
 
 class LoginFragment : Fragment() {
 
@@ -37,10 +39,29 @@ class LoginFragment : Fragment() {
 
             if (email.isNotEmpty() && pass.isNotEmpty()) {
                 FirebaseAuth.getInstance().signInWithEmailAndPassword(email, pass)
-                    .addOnSuccessListener {
-                        Toast.makeText(context, "¡Bienvenido de nuevo!", Toast.LENGTH_SHORT).show()
-                        // Navegamos a la Home usando la acción del nav_graph
-                        findNavController().navigate(R.id.action_loginFragment_to_navigation_home)
+                    .addOnSuccessListener { authResult ->
+                        // Verificar estado del usuario antes de dejarlo entrar
+                        val userId = authResult.user?.uid ?: return@addOnSuccessListener
+                        
+                        Firebase.firestore.collection("usuarios")
+                            .document(userId)
+                            .get()
+                            .addOnSuccessListener { document ->
+                                val estado = document.getString("estado") ?: "ACTIVO"
+                                
+                                if (estado == "ACTIVO") {
+                                    Toast.makeText(context, "¡Bienvenido de nuevo!", Toast.LENGTH_SHORT).show()
+                                    findNavController().navigate(R.id.action_loginFragment_to_navigation_home)
+                                } else {
+                                    // Usuario inactivo, cerrar sesión y mostrar mensaje
+                                    FirebaseAuth.getInstance().signOut()
+                                    Toast.makeText(
+                                        context, 
+                                        "Tu cuenta está desactivada. Contacta con soporte.", 
+                                        Toast.LENGTH_LONG
+                                    ).show()
+                                }
+                            }
                     }
                     .addOnFailureListener {
                         Toast.makeText(context, "Error: Email o contraseña incorrectos", Toast.LENGTH_SHORT).show()

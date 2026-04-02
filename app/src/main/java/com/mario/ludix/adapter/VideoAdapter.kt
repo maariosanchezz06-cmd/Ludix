@@ -36,8 +36,10 @@ class VideoAdapter(
         val tvLikesCount: TextView? = view.findViewById(R.id.tvLikesCount)
         val ivShare: ImageView? = view.findViewById(R.id.ivShare) // Botón compartir
         val ivComments: ImageView? = view.findViewById(R.id.ivComments) // Botón comentarios
-        val tvAutor: TextView? = view.findViewById(R.id.tvAutor)
-        val tvTitulo: TextView? = view.findViewById(R.id.tvTitulo)
+        val tvCommentsCount: TextView? = view.findViewById(R.id.tvCommentsCount) // Contador comentarios real
+        val tvAutorClip: TextView = view.findViewById(R.id.tvAutorClip)
+        val tvJuegoClip: TextView = view.findViewById(R.id.tvJuegoClip)
+        val tvTituloClip: TextView = view.findViewById(R.id.tvTituloClip)
 
         var player: ExoPlayer? = null
         var isLiked: Boolean = false
@@ -52,9 +54,26 @@ class VideoAdapter(
     override fun onBindViewHolder(holder: VideoViewHolder, position: Int) {
         val clip = listaVideos[position]
 
-        holder.tvAutor?.text = clip.autor
-        holder.tvTitulo?.text = clip.titulo
+        // Mostramos el Autor y el Título
+        holder.tvAutorClip.text = clip.autor
+        holder.tvTituloClip.text = clip.titulo
         holder.tvLikesCount?.text = clip.likes.toString()
+
+        // Lógica para mostrar u ocultar el nombre del juego
+        val nombreJuego = clip.juego
+        if (nombreJuego.isNotEmpty() && nombreJuego != "General" && nombreJuego != "sin_juego") {
+            holder.tvJuegoClip.text = "🎮 $nombreJuego"
+            holder.tvJuegoClip.visibility = View.VISIBLE
+        } else {
+            holder.tvJuegoClip.visibility = View.GONE
+        }
+
+        // --- CONTADOR DE COMENTARIOS EN TIEMPO REAL ---
+        db.collection("clips").document(clip.id).collection("comentarios")
+            .addSnapshotListener { snapshots, e ->
+                if (e != null || snapshots == null) return@addSnapshotListener
+                holder.tvCommentsCount?.text = snapshots.size().toString()
+            }
 
         // --- REPRODUCTOR ---
         val player = ExoPlayer.Builder(context).build()

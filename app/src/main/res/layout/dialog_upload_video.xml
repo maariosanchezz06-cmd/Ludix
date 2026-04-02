@@ -30,6 +30,15 @@
         android:textColorHint="@color/text_secondary"
         app:layout_constraintTop_toBottomOf="@id/tvDialogTitle"/>
 
+    <Spinner
+        android:id="@+id/spinnerJuegos"
+        android:layout_width="match_parent"
+        android:layout_height="55dp"
+        android:layout_marginTop="16dp"
+        android:background="@drawable/bg_input_field"
+        android:popupBackground="@drawable/bg_input_field"
+        app:layout_constraintTop_toBottomOf="@id/etDialogInput"/>
+
     <Button
         android:id="@+id/btnDialogSubmit"
         android:layout_width="match_parent"
@@ -40,5 +49,5 @@
         android:textColor="@color/white"
         android:textStyle="bold"
         app:backgroundTint="@null"
-        app:layout_constraintTop_toBottomOf="@id/etDialogInput"/>
+        app:layout_constraintTop_toBottomOf="@id/spinnerJuegos"/>
 </androidx.constraintlayout.widget.ConstraintLayout>

@@ -17,6 +17,61 @@
         app:layout_constraintTop_toTopOf="parent" />
 
     <LinearLayout
+        android:id="@+id/llVideoInfo"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:padding="16dp"
+        android:layout_marginEnd="60dp" 
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        android:layout_marginBottom="16dp">
+
+        <TextView
+            android:id="@+id/tvAutorClip"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@usuario"
+            android:textColor="@color/white"
+            android:textSize="16sp"
+            android:textStyle="bold"
+            android:shadowColor="#80000000"
+            android:shadowDx="2"
+            android:shadowDy="2"
+            android:shadowRadius="4" />
+
+        <TextView
+            android:id="@+id/tvJuegoClip"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="🎮 Nombre del Juego"
+            android:textColor="#00E5FF" 
+            android:textSize="13sp"
+            android:textStyle="bold"
+            android:layout_marginTop="4dp"
+            android:shadowColor="#80000000"
+            android:shadowDx="2"
+            android:shadowDy="2"
+            android:shadowRadius="4" />
+
+        <TextView
+            android:id="@+id/tvTituloClip"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Aquí va el título que pone el usuario..."
+            android:textColor="@color/white"
+            android:textSize="14sp"
+            android:layout_marginTop="6dp"
+            android:shadowColor="#80000000"
+            android:shadowDx="2"
+            android:shadowDy="2"
+            android:shadowRadius="4"
+            android:maxLines="2"
+            android:ellipsize="end" />
+    </LinearLayout>
+
+    <LinearLayout
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:orientation="vertical"
@@ -65,6 +120,7 @@
             android:layout_marginBottom="4dp"
             android:background="?attr/selectableItemBackgroundBorderless" />
         <TextView
+            android:id="@+id/tvCommentsCount"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="0"

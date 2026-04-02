@@ -10,35 +10,87 @@ import kotlinx.coroutines.tasks.await
 
 class AuthRepository {
 
-    // Instancias de Firebase (El "cerebro" y la "memoria")
     private val auth: FirebaseAuth = Firebase.auth
     private val db: FirebaseFirestore = Firebase.firestore
 
     /**
-     * Registra un usuario nuevo.
-     * 1. Crea la cuenta en Firebase Authentication.
-     * 2. Guarda los datos del perfil en Firestore Database.
+     * Registra un usuario nuevo con estado ACTIVO por defecto
      */
     suspend fun registrarUsuario(email: String, pass: String, nombre: String): Boolean {
         return try {
-            // Paso 1: Crear usuario en Auth
             val authResult = auth.createUserWithEmailAndPassword(email, pass).await()
             val uid = authResult.user?.uid ?: return false
 
-            // Paso 2: Crear el objeto Usuario con el ID que nos ha dado Firebase
             val nuevoUsuario = Usuario(
                 id_usuario = uid,
                 nombre_usuario = nombre,
-                email = email
+                email = email,
+                estado = "ACTIVO"  // Estado inicial
             )
 
-            // Paso 3: Guardarlo en la colección "usuarios" de la base de datos
             db.collection("usuarios").document(uid).set(nuevoUsuario).await()
-
-            true // Todo ha ido bien
+            true
         } catch (e: Exception) {
             e.printStackTrace()
-            false // Algo falló
+            false
+        }
+    }
+
+    /**
+     * Desactiva una cuenta (borrado lógico) - Objetivo 5.5
+     */
+    suspend fun desactivarCuenta(userId: String): Boolean {
+        return try {
+            db.collection("usuarios")
+                .document(userId)
+                .update("estado", "INACTIVO")
+                .await()
+            true
+        } catch (e: Exception) {
+            e.printStackTrace()
+            false
+        }
+    }
+
+    /**
+     * Reactiva una cuenta
+     */
+    suspend fun reactivarCuenta(userId: String): Boolean {
+        return try {
+            db.collection("usuarios")
+                .document(userId)
+                .update("estado", "ACTIVO")
+                .await()
+            true
+        } catch (e: Exception) {
+            e.printStackTrace()
+            false
+        }
+    }
+
+    /**
+     * Obtiene los datos del usuario actual
+     */
+    suspend fun obtenerUsuarioActual(): Usuario? {
+        return try {
+            val uid = auth.currentUser?.uid ?: return null
+            val document = db.collection("usuarios").document(uid).get().await()
+            document.toObject(Usuario::class.java)
+        } catch (e: Exception) {
+            e.printStackTrace()
+            null
+        }
+    }
+
+    /**
+     * Verifica si el usuario está activo antes de permitir login
+     */
+    suspend fun verificarEstadoUsuario(userId: String): String {
+        return try {
+            val document = db.collection("usuarios").document(userId).get().await()
+            document.getString("estado") ?: "ACTIVO"
+        } catch (e: Exception) {
+            "ACTIVO"
         }
     }
 }
