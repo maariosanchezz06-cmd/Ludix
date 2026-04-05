@@ -59,4 +59,30 @@
         android:label="Buscador"
         tools:layout="@layout/fragment_search" />
 
+    <fragment
+        android:id="@+id/navigation_profile"
+        android:name="com.mario.ludix.ui.profile.ProfileFragment"
+        android:label="Mi Perfil"
+        tools:layout="@layout/fragment_profile" />
+
+    <fragment
+        android:id="@+id/gameDetailFragment"
+        android:name="com.mario.ludix.ui.gamedetail.GameDetailFragment"
+        android:label="Detalle del Juego"
+        tools:layout="@layout/fragment_game_detail">
+        
+        <argument
+            android:name="juegoId"
+            app:argType="string" />
+        <argument
+            android:name="juegoTitulo"
+            app:argType="string" />
+        <argument
+            android:name="juegoGenero"
+            app:argType="string" />
+        <argument
+            android:name="juegoImageUrl"
+            app:argType="string" />
+    </fragment>
+
 </navigation>

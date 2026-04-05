@@ -4,7 +4,7 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/black"
+    android:background="@color/ludix_bg"
     android:padding="24dp">
 
     <TextView
@@ -32,11 +32,45 @@
             android:layout_width="match_parent"
             android:layout_height="55dp"
             android:background="@drawable/bg_input_field"
-            android:hint="Busca un videojuego..."
+            android:hint="Busca juegos o usuarios..."
             android:paddingStart="16dp"
             android:textColor="@color/white"
-            android:textColorHint="@color/text_secondary" />
+            android:textColorHint="@color/text_secondary"
+            android:imeOptions="actionSearch"
+            android:inputType="text"
+            android:maxLines="1" />
     </com.google.android.material.textfield.TextInputLayout>
+
+    <!-- Selector de tipo de búsqueda -->
+    <com.google.android.material.chip.ChipGroup
+        android:id="@+id/cgSearchType"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="12dp"
+        app:singleSelection="true"
+        app:selectionRequired="true"
+        app:layout_constraintTop_toBottomOf="@id/tilBuscador"
+        app:layout_constraintStart_toStartOf="parent">
+
+        <com.google.android.material.chip.Chip
+            android:id="@+id/chipSearchJuegos"
+            style="@style/Widget.MaterialComponents.Chip.Choice"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Juegos"
+            android:checked="true"
+            app:chipBackgroundColor="@color/chip_background_color"
+            android:textColor="@color/white" />
+
+        <com.google.android.material.chip.Chip
+            android:id="@+id/chipSearchUsuarios"
+            style="@style/Widget.MaterialComponents.Chip.Choice"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Usuarios"
+            app:chipBackgroundColor="@color/chip_background_color"
+            android:textColor="@color/white" />
+    </com.google.android.material.chip.ChipGroup>
 
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/rvResultadosBusqueda"
@@ -44,6 +78,6 @@
         android:layout_height="0dp"
         android:layout_marginTop="16dp"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/tilBuscador" />
+        app:layout_constraintTop_toBottomOf="@id/cgSearchType" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

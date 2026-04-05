@@ -1,32 +1,41 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:orientation="horizontal"
-    android:layout_marginBottom="16dp">
+    android:layout_marginBottom="16dp"
+    android:gravity="center_vertical">
 
-    <ImageView
+    <!-- Avatar del usuario -->
+    <com.google.android.material.imageview.ShapeableImageView
+        android:id="@+id/ivAvatarComentario"
         android:layout_width="36dp"
         android:layout_height="36dp"
         android:src="@drawable/logo_ludix"
-        android:background="@drawable/bg_input_field"
-        android:padding="4dp" />
+        android:scaleType="centerCrop"
+        app:strokeColor="@color/ludix_cyan"
+        app:strokeWidth="1dp"
+        app:shapeAppearanceOverlay="@style/CircleShape" />
 
     <LinearLayout
-        android:layout_width="match_parent"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
+        android:layout_weight="1"
         android:orientation="vertical"
         android:layout_marginStart="12dp">
 
+        <!-- Nombre del autor -->
         <TextView
             android:id="@+id/tvAutorComentario"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="@usuario"
-            android:textColor="@color/text_secondary"
+            android:textColor="@color/ludix_cyan"
             android:textSize="12sp"
             android:textStyle="bold" />
 
+        <!-- Texto del comentario -->
         <TextView
             android:id="@+id/tvTextoComentario"
             android:layout_width="wrap_content"
@@ -34,6 +43,28 @@
             android:text="Aquí va el texto del comentario..."
             android:textColor="@color/white"
             android:textSize="14sp"
-            android:layout_marginTop="4dp" />
+            android:layout_marginTop="2dp" />
+
+        <!-- Tiempo -->
+        <TextView
+            android:id="@+id/tvTiempoComentario"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Hace 5 min"
+            android:textColor="@color/text_secondary"
+            android:textSize="10sp"
+            android:layout_marginTop="2dp" />
     </LinearLayout>
+
+    <!-- Botón borrar (solo visible si es propio) -->
+    <ImageView
+        android:id="@+id/ivBorrarComentario"
+        android:layout_width="28dp"
+        android:layout_height="28dp"
+        android:src="@drawable/ic_delete"
+        android:padding="4dp"
+        android:visibility="gone"
+        android:background="?attr/selectableItemBackgroundBorderless"
+        app:tint="#FF6B6B" />
+
 </LinearLayout>
