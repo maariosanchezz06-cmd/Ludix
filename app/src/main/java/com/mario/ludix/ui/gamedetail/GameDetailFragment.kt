@@ -147,15 +147,13 @@ class GameDetailFragment : Fragment() {
     private fun cargarClipsDelJuego() {
         db.collection("clips")
             .whereEqualTo("id_juego", juegoId)
-            .orderBy("timestamp", Query.Direction.DESCENDING)
-            .limit(10)
             .get()
             .addOnSuccessListener { result ->
                 val clips = result.map { doc ->
                     val clip = doc.toObject(Clip::class.java)
                     clip.id = doc.id
                     clip
-                }
+                }.sortedByDescending { it.timestamp }.take(10)
 
                 if (clips.isEmpty()) {
                     binding.tvSinClipsJuego.visibility = View.VISIBLE
@@ -165,7 +163,6 @@ class GameDetailFragment : Fragment() {
                     binding.rvClipsJuego.visibility = View.VISIBLE
                     binding.rvClipsJuego.adapter = ClipMiniAdapter(clips) { clip ->
                         Toast.makeText(context, "Clip de ${clip.autor}", Toast.LENGTH_SHORT).show()
-                        // Aquí podrías navegar al feed en ese clip específico
                     }
                 }
             }

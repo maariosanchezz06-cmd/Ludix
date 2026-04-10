@@ -113,16 +113,14 @@ class ProfileFragment : Fragment() {
     private fun cargarMisClips() {
         db.collection("clips")
             .whereEqualTo("autorId", userId)
-            .orderBy("timestamp", Query.Direction.DESCENDING)
             .get()
             .addOnSuccessListener { result ->
                 val clips = result.map { doc ->
                     val clip = doc.toObject(Clip::class.java)
                     clip.id = doc.id
                     clip
-                }
+                }.sortedByDescending { it.timestamp }
 
-                // Contar likes totales
                 val totalLikes = clips.sumOf { it.likes }
                 binding.tvNumLikes.text = totalLikes.toString()
                 binding.tvNumClips.text = clips.size.toString()
@@ -137,6 +135,10 @@ class ProfileFragment : Fragment() {
                         Toast.makeText(context, "Clip: ${clip.titulo}", Toast.LENGTH_SHORT).show()
                     }
                 }
+            }
+            .addOnFailureListener {
+                binding.tvSinClips.visibility = View.VISIBLE
+                binding.tvSinClips.text = "Error al cargar clips"
             }
     }
 

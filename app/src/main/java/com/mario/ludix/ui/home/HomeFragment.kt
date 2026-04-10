@@ -74,6 +74,16 @@ class HomeFragment : Fragment() {
             }
     }
 
+    override fun onPause() {
+        super.onPause()
+        (binding.viewPagerVideos.adapter as? VideoAdapter)?.pauseAllVideos()
+    }
+
+    override fun onResume() {
+        super.onResume()
+        // El vídeo actual se reanudará automáticamente si se maneja en el adapter
+    }
+
     override fun onDestroyView() {
         super.onDestroyView()
         _binding = null

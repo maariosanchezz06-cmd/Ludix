@@ -17,6 +17,7 @@ import androidx.navigation.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
+import com.bumptech.glide.load.engine.DiskCacheStrategy
 import com.google.android.material.bottomsheet.BottomSheetDialog
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FieldValue
@@ -31,6 +32,7 @@ class VideoAdapter(
 
     private val db = FirebaseFirestore.getInstance()
     private val playersMap = mutableMapOf<Int, ExoPlayer>()
+    private var currentPlayingHolder: VideoViewHolder? = null
 
     class VideoViewHolder(view: View) : RecyclerView.ViewHolder(view) {
         val playerView: PlayerView? = view.findViewById(R.id.playerView)
@@ -68,10 +70,24 @@ class VideoAdapter(
                     if (doc.exists()) {
                         val avatar = doc.getString("imagen_perfil") ?: ""
                         if (avatar.isNotEmpty()) {
-                            Glide.with(context).load(avatar).circleCrop().into(holder.ivPerfilMini)
+                            Glide.with(context)
+                                .load(avatar)
+                                .diskCacheStrategy(DiskCacheStrategy.ALL)
+                                .circleCrop()
+                                .into(holder.ivPerfilMini)
                         }
                     }
                 }
+        }
+
+        // --- CLICK EN AVATAR: Navegar al perfil del autor ---
+        holder.ivPerfilMini.setOnClickListener {
+            val currentUserId = FirebaseAuth.getInstance().currentUser?.uid
+            if (clip.autorId.isNotEmpty() && clip.autorId != currentUserId) {
+                android.widget.Toast.makeText(context, "Perfil de ${clip.autor}", android.widget.Toast.LENGTH_SHORT).show()
+            } else if (clip.autorId == currentUserId) {
+                holder.itemView.findNavController().navigate(R.id.navigation_profile)
+            }
         }
 
         // --- LÓGICA DEL JUEGO ---
@@ -99,6 +115,9 @@ class VideoAdapter(
             holder.tvJuegoClip.visibility = View.GONE
         }
 
+        // Pausar el vídeo anterior
+        currentPlayingHolder?.player?.pause()
+
         // --- OPTIMIZACIÓN REPRODUCTOR: Crear solo si es necesario ---
         val player = ExoPlayer.Builder(context).build()
         holder.playerView?.player = player
@@ -110,8 +129,10 @@ class VideoAdapter(
             player.setMediaItem(mediaItem)
             player.prepare()
             // No reproducir automáticamente todos, solo el primero o según el scroll
-            player.playWhenReady = false 
+            player.playWhenReady = true 
             player.repeatMode = Player.REPEAT_MODE_ONE
+            
+            currentPlayingHolder = holder
         }
 
         // Contador comentarios
@@ -200,7 +221,15 @@ class VideoAdapter(
         playersMap[position]?.release()
         playersMap.remove(position)
         holder.player = null
+        if (currentPlayingHolder == holder) {
+            currentPlayingHolder = null
+        }
     }
 
     override fun getItemCount(): Int = listaVideos.size
+
+    fun pauseAllVideos() {
+        currentPlayingHolder?.player?.pause()
+        currentPlayingHolder = null
+    }
 }

@@ -86,16 +86,15 @@ class SearchFragment : Fragment() {
     }
 
     private fun buscarJuegos(query: String) {
+        val queryLower = query.lowercase()
+        
         db.collection("juegos")
-            .orderBy("titulo")
-            .startAt(query)
-            .endAt(query + "\uf8ff")
             .get()
             .addOnSuccessListener { result ->
-                val lista = result.map { doc ->
+                val lista = result.mapNotNull { doc ->
                     val juego = doc.toObject(Videojuego::class.java)
                     juego.id = doc.id
-                    juego
+                    if (juego.titulo.lowercase().contains(queryLower)) juego else null
                 }
                 rvResultados.adapter = JuegoAdapter(lista) { juego ->
                     val bundle = Bundle().apply {
@@ -110,20 +109,17 @@ class SearchFragment : Fragment() {
     }
 
     private fun buscarUsuarios(query: String) {
+        val queryLower = query.lowercase()
+        
         db.collection("usuarios")
-            .orderBy("nombre_usuario")
-            .startAt(query)
-            .endAt(query + "\uf8ff")
             .get()
             .addOnSuccessListener { result ->
-                val lista = result.map { doc ->
+                val lista = result.mapNotNull { doc ->
                     val user = doc.toObject(Usuario::class.java)
-                    // El ID en el objeto Usuario suele ser 'id_usuario' según tu modelo
-                    user
+                    if (user.nombre_usuario.lowercase().contains(queryLower)) user else null
                 }
                 rvResultados.adapter = UsuarioAdapter(lista) { usuario ->
                     Toast.makeText(context, "Perfil de @${usuario.nombre_usuario}", Toast.LENGTH_SHORT).show()
-                    // Aquí podrías navegar a un fragmento de perfil ajeno si lo tuvieras
                 }
             }
     }
